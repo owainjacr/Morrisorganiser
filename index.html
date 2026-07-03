@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Shopping List Organiser</title>
+  <meta name="description" content="Sort a shopping list by supermarket aisle using a built-in food dictionary, fuzzy matching, typo recognition and custom rules." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Aisle-aware sorter</p>
+        <h1>Smart Shopping List Organiser</h1>
+        <p class="hero-copy">
+          Paste a random shopping list. The organiser classifies each item using a food taxonomy,
+          typo-tolerant fuzzy matching, aliases and your own saved corrections.
+        </p>
+      </div>
+      <div class="hero-card" aria-label="Aisle order">
+        <h2>Aisle order</h2>
+        <ol>
+          <li>Salad / fruit</li>
+          <li>Meat</li>
+          <li>Cheese &amp; milk</li>
+          <li>Curry sauce, ingredients, spices</li>
+          <li>Crisps</li>
+          <li>Coke</li>
+        </ol>
+      </div>
+    </header>
+
+    <section class="panel input-panel" aria-labelledby="input-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="input-heading">Shopping list</h2>
+          <p>Use one item per line. Comma-separated input is also accepted.</p>
+        </div>
+        <div class="actions compact-actions">
+          <button class="secondary" id="loadExampleBtn" type="button">Load example</button>
+          <button class="ghost" id="clearBtn" type="button">Clear</button>
+        </div>
+      </div>
+
+      <textarea id="shoppingInput" spellcheck="true" placeholder="brie&#10;Curry sauce&#10;Fruit&#10;chicken thighs&#10;camembert&#10;coke"></textarea>
+
+      <div class="controls">
+        <label class="control">
+          <span>Review threshold</span>
+          <input id="thresholdInput" type="range" min="45" max="95" value="67" />
+          <strong id="thresholdLabel">67%</strong>
+        </label>
+
+        <label class="checkbox-control">
+          <input id="groupedToggle" type="checkbox" checked />
+          <span>Show grouped aisle view</span>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="organiseBtn" type="button">Organise list</button>
+        <button class="secondary" id="copyBtn" type="button" disabled>Copy sorted list</button>
+      </div>
+    </section>
+
+    <section class="stats-grid" aria-label="Sorting summary">
+      <article class="stat-card">
+        <span id="totalCount">0</span>
+        <p>Total items</p>
+      </article>
+      <article class="stat-card">
+        <span id="matchedCount">0</span>
+        <p>Matched</p>
+      </article>
+      <article class="stat-card warning">
+        <span id="reviewCount">0</span>
+        <p>Needs review</p>
+      </article>
+      <article class="stat-card">
+        <span id="customCount">0</span>
+        <p>Custom aliases</p>
+      </article>
+    </section>
+
+    <section class="panel result-panel" aria-labelledby="result-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="result-heading">Organised output</h2>
+          <p id="resultHelp">Sort a list to see the output.</p>
+        </div>
+        <div class="actions compact-actions">
+          <button class="secondary" id="downloadBtn" type="button" disabled>Download .txt</button>
+        </div>
+      </div>
+
+      <div id="groupedResults" class="grouped-results hidden"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Aisle</th>
+              <th>Matched by</th>
+              <th>Confidence</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody">
+            <tr class="empty-row">
+              <td colspan="5">No list organised yet.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel review-panel" aria-labelledby="review-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="review-heading">Needs review</h2>
+          <p>Low-confidence and unknown items appear here. Assign an aisle once and the app remembers it locally.</p>
+        </div>
+      </div>
+      <div id="reviewList" class="review-list empty-state">Nothing to review yet.</div>
+    </section>
+
+    <section class="panel rules-panel" aria-labelledby="rules-heading">
+      <div class="section-heading">
+        <div>
+          <h2 id="rules-heading">Custom rules</h2>
+          <p>Add household-specific aliases, brand names or recurring misspellings.</p>
+        </div>
+      </div>
+
+      <form id="customRuleForm" class="rule-form">
+        <label>
+          <span>Phrase or typo</span>
+          <input id="customPhraseInput" type="text" placeholder="e.g. camambert" autocomplete="off" />
+        </label>
+        <label>
+          <span>Aisle</span>
+          <select id="customAisleInput"></select>
+        </label>
+        <button type="submit">Save rule</button>
+      </form>
+
+      <div class="rule-actions">
+        <button class="secondary" id="exportRulesBtn" type="button">Export rules</button>
+        <label class="file-button">
+          Import rules
+          <input id="importRulesInput" type="file" accept="application/json,.json" />
+        </label>
+        <button class="ghost danger" id="resetRulesBtn" type="button">Reset custom rules</button>
+      </div>
+
+      <div id="customRulesList" class="custom-rules-list empty-state">No custom rules saved.</div>
+    </section>
+  </main>
+
+  <template id="reviewItemTemplate">
+    <div class="review-item">
+      <div>
+        <strong class="review-name"></strong>
+        <p class="review-reason"></p>
+      </div>
+      <div class="review-actions">
+        <select class="review-aisle"></select>
+        <button type="button" class="save-review">Remember</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
